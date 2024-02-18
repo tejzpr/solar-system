@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Simulation</title>
+    <meta name="description"
+        content="Explore a detailed simulation of the Solar System, featuring accurate distances and size ratios of planets and other celestial bodies. Dive into the cosmos and learn about our solar neighborhood.">
+    <meta name="keywords"
+        content="Solar System, Simulation, Planets, Space, Astronomy, Educational, Science, Cosmos, Universe">
+    <meta name="author" content="Tejus Pratap (tejzpr@gmail.com)">
+    <link rel="canonical" href="https://www.yourwebsite.com/solar-system-simulation">
+    <meta property="og:title" content="Solar System Simulation">
+    <meta property="og:description"
+        content="Explore a detailed simulation of the Solar System, featuring accurate distances and size ratios of planets and other celestial bodies.">
+    <meta property="og:image" content="https://www.yourwebsite.com/path/to/image.jpg">
+    <meta property="og:url" content="https://www.yourwebsite.com/solar-system-simulation">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Solar System Simulation">
+    <meta name="twitter:description"
+        content="Explore a detailed simulation of the Solar System, featuring accurate distances and size ratios of planets and other celestial bodies.">
+    <meta name="twitter:image" content="https://www.yourwebsite.com/path/to/twitter-image.jpg">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            background-color: black;
+        }
+    </style>
+</head>
+
+
+<body>
+    <solar></solar>
+    <script>
+        function darwSolarSystem(zoom) {
+            const sol = document.getElementsByTagName("solar");
+            if (sol.length > 0 && sol[0].children.length > 0) {
+                sol[0].removeChild(sol[0].firstElementChild);
+            }
+            let canvasRatio = .15; // Zoom
+            if (zoom) {
+                canvasRatio = zoom; // Zoom
+            }
+
+            const width = window.innerWidth - 20;
+            const height = window.innerHeight - 20;
+            const svg = d3.select("solar").append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            svg.append("rect")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("fill", "black");
+
+            const pi = 3.14;
+            const center = { x: width / 2, y: height / 2 };
+
+            const canvasWidth = width - 70;
+
+            const sun = canvasWidth * (canvasRatio / 10);
+            const sunSurface = sun;
+            svg.append("circle")
+                .attr("cx", center.x)
+                .attr("cy", center.y)
+                .attr("r", sun) // Sun
+                .style("fill", "orange");
+
+            const minorObjectsRatio = 5;
+            const majorObjectsRatio = 2;
+            const outerPlanetsRatio = 1;
+            const innerPlanetsRatio = 3;
+            const planets = [
+                { name: "Mercury", radius: (sunSurface / 285) * majorObjectsRatio * innerPlanetsRatio, color: "white", orbitRadius: sunSurface + (canvasRatio * 46), revolutionSpeed: 0.04 },
+                { name: "Venus", radius: (sunSurface / 115) * majorObjectsRatio * innerPlanetsRatio, color: "orange", orbitRadius: sunSurface + (canvasRatio * 108), revolutionSpeed: 0.03 },
+                { name: "Earth", radius: (sunSurface / 109) * majorObjectsRatio * innerPlanetsRatio, color: "blue", orbitRadius: sunSurface + (canvasRatio * 150), revolutionSpeed: 0.02 },
+                { name: "Mars", radius: (sunSurface / 205) * majorObjectsRatio * innerPlanetsRatio, color: "red", orbitRadius: sunSurface + (canvasRatio * 228), revolutionSpeed: 0.015 },
+                { name: "Jupiter", radius: (sunSurface / 10) * majorObjectsRatio * outerPlanetsRatio, color: "brown", orbitRadius: sunSurface + (canvasRatio * 778), revolutionSpeed: 0.0055 },
+                { name: "Saturn", radius: (sunSurface / 12) * majorObjectsRatio * outerPlanetsRatio, color: "yellow", orbitRadius: sunSurface + (canvasRatio * 1400), revolutionSpeed: 0.0045 },
+                { name: "Uranus", radius: (sunSurface / 27) * majorObjectsRatio * outerPlanetsRatio, color: "teal", orbitRadius: sunSurface + (canvasRatio * 2900), revolutionSpeed: 0.0032 },
+                { name: "Neptune", radius: (sunSurface / 28) * majorObjectsRatio * outerPlanetsRatio, color: "blue", orbitRadius: sunSurface + (canvasRatio * 4400), revolutionSpeed: 0.002 },
+            ];
+
+            // Draw orbits
+            planets.forEach(planet => {
+                svg.append("circle")
+                    .attr("cx", center.x)
+                    .attr("cy", center.y)
+                    .attr("r", planet.orbitRadius)
+                    .style("fill", "none")
+                    .style("stroke", "dark-grey");
+            });
+
+            // Create planet groups for rotation around the Sun
+            const planetGroups = svg.selectAll(".planetGroup")
+                .data(planets)
+                .enter()
+                .append("g")
+                .attr("transform", d => `translate(${center.x},${center.y})`);
+
+            // Append planets to their groups
+            planetGroups.append("circle")
+                .attr("r", d => d.radius)
+                .attr("cx", d => d.orbitRadius) // Set initial x position based on orbitRadius
+                .attr("cy", 0) // Keep y position at 0 within the group
+                .style("fill", d => d.color);
+
+
+            planetGroups.each(function (d) {
+                const planetGroup = d3.select(this);
+                if (d.name === "Saturn") {
+                    // Adjust these values as necessary to get the desired look
+                    const ringInnerRadius = d.radius + 5 * canvasRatio * 2;
+                    const ringMiddleRadius = d.radius + 10 * canvasRatio * 2;
+                    const ringOuterRadius = d.radius + 15 * canvasRatio * 2;
+                    const ringThickness = 1; // How thick the ring appears
+
+                    // Outer Ring
+                    planetGroup.append("ellipse")
+                        .attr("cx", d.orbitRadius)
+                        .attr("cy", 0)
+                        .attr("rx", ringOuterRadius)
+                        .attr("ry", ringOuterRadius * 0.3) // Ellipse height to make it look tilted
+                        .style("fill", "none")
+                        .style("stroke", "lightgrey")
+                        .style("stroke-width", ringThickness);
+                    // Inner Ring - Optional, for added effect
+                    planetGroup.append("ellipse")
+                        .attr("cx", d.orbitRadius)
+                        .attr("cy", 0)
+                        .attr("rx", ringMiddleRadius)
+                        .attr("ry", ringMiddleRadius * 0.3) // Adjust the height for tilt
+                        .style("fill", "none")
+                        .style("stroke", "lightgrey")
+                        .style("stroke-width", ringThickness); // Slightly thinner than the outer ring
+                    // Inner Ring - Optional, for added effect
+                    planetGroup.append("ellipse")
+                        .attr("cx", d.orbitRadius)
+                        .attr("cy", 0)
+                        .attr("rx", ringInnerRadius)
+                        .attr("ry", ringInnerRadius * 0.3) // Adjust the height for tilt
+                        .style("fill", "none")
+                        .style("stroke", "lightgrey")
+                        .style("stroke-width", ringThickness); // Slightly thinner than the outer ring
+                }
+            });
+
+            // Animate the revolution of planets around the Sun
+            d3.timer(elapsed => {
+                planetGroups.attr("transform", d => {
+                    const angle = (elapsed * d.revolutionSpeed) % 360;
+                    return `translate(${center.x},${center.y}) rotate(${angle})`;
+                });
+            });
+
+
+            const asteroidBeltInnerRadius = sunSurface + (canvasRatio * 329); // Just outside Mars
+            const asteroidBeltOuterRadius = sunSurface + (canvasRatio * 478); // Just before Jupiter
+            const numberOfAsteroids = 1000; // Number of asteroids to generate
+
+            // Function to generate random positions for asteroids within the belt
+            function generateAsteroids() {
+                return Array.from({ length: numberOfAsteroids }, () => {
+                    const radius = Math.random() * (asteroidBeltOuterRadius - asteroidBeltInnerRadius) + asteroidBeltInnerRadius;
+                    const angle = Math.random() * 2 * Math.PI;
+                    return { radius, angle };
+                });
+            }
+
+            const asteroids = generateAsteroids();
+
+            // Create a group for the asteroid belt
+            const asteroidBelt = svg.append("g")
+                .attr("class", "asteroidBelt")
+                .attr("transform", `translate(${center.x},${center.y})`);
+
+            // Draw the asteroids within the group
+            asteroidBelt.selectAll(".asteroid")
+                .data(asteroids)
+                .enter()
+                .append("circle")
+                .attr("class", "asteroid")
+                .attr("r", (sunSurface / 599) * minorObjectsRatio) // Asteroids are small, so we use a radius of 1
+                .attr("cx", d => d.radius * Math.cos(d.angle))
+                .attr("cy", d => d.radius * Math.sin(d.angle))
+                .style("fill", "white");
+
+            // Animate the asteroid belt
+            d3.timer(function (elapsed) {
+                asteroidBelt.attr("transform", `translate(${center.x},${center.y}) rotate(${elapsed * 0.0002})`);
+            });
+
+
+
+            const dwarfPlanets = [
+                { name: "Pluto", radius: (sunSurface / 585) * minorObjectsRatio, color: "lightgrey", orbitRadius: sunSurface + (canvasRatio * 5900), revolutionSpeed: 0.0016 },
+                { name: "Eris", radius: (sunSurface / 598) * minorObjectsRatio, color: "cyan", orbitRadius: sunSurface + (canvasRatio * 10000), revolutionSpeed: 0.0012 },
+                { name: "Haumea", radius: (sunSurface / 599) * minorObjectsRatio, color: "darkgrey", orbitRadius: sunSurface + (canvasRatio * 6400), revolutionSpeed: 0.0014 },
+            ];
+
+            // Draw orbits for dwarf planets
+            dwarfPlanets.forEach(dwarfPlanet => {
+                svg.append("circle")
+                    .attr("cx", center.x)
+                    .attr("cy", center.y)
+                    .attr("r", dwarfPlanet.orbitRadius)
+                    .style("fill", "none")
+                    .style("stroke", "dark-grey")
+                    .style("stroke-dasharray", "2,2"); // Optional: make the orbit line dashed
+            });
+
+            // Draw and animate dwarf planets
+            dwarfPlanets.forEach(dwarfPlanet => {
+                const dwarfPlanetGroup = svg.append("g")
+                    .attr("transform", `translate(${center.x},${center.y})`);
+
+                dwarfPlanetGroup.append("circle")
+                    .attr("r", dwarfPlanet.radius)
+                    .attr("cx", dwarfPlanet.orbitRadius) // Start position on its orbit
+                    .attr("cy", 0)
+                    .style("fill", dwarfPlanet.color);
+
+                // Animate
+                d3.timer(function (elapsed) {
+                    const angle = (elapsed * dwarfPlanet.revolutionSpeed) % 360;
+                    dwarfPlanetGroup.attr("transform", `translate(${center.x},${center.y}) rotate(${angle})`);
+                });
+            });
+
+
+            // Kuiper belt
+
+            const kuiperBeltInnerRadius = sunSurface + (canvasRatio * 4800); // Just outside Mars
+            const kuiperBeltOuterRadius = sunSurface + (canvasRatio * 7400); // Just before Jupiter
+            const numberOfKuiperObjects = 50000; // Number of asteroids to generate
+
+            // Function to generate random positions for asteroids within the belt
+            function generateKuiperObjects() {
+                return Array.from({ length: numberOfKuiperObjects }, () => {
+                    const radius = Math.random() * (kuiperBeltOuterRadius - kuiperBeltInnerRadius) + kuiperBeltInnerRadius;
+                    const angle = Math.random() * 2 * Math.PI;
+                    return { radius, angle };
+                });
+            }
+
+            const kuiperObjects = generateKuiperObjects();
+
+            // Create a group for the asteroid belt
+            const kuiperBelt = svg.append("g")
+                .attr("class", "kuiperBelt")
+                .attr("transform", `translate(${center.x},${center.y})`);
+
+            // Draw the asteroids within the group
+            kuiperBelt.selectAll(".kuiperBelt")
+                .data(kuiperObjects)
+                .enter()
+                .append("circle")
+                .attr("class", "kuiperBelt")
+                .attr("r", (sunSurface / 599) * minorObjectsRatio) // Asteroids are small, so we use a radius of 1
+                .attr("cx", d => d.radius * Math.cos(d.angle))
+                .attr("cy", d => d.radius * Math.sin(d.angle))
+                .style("fill", "white");
+
+            // Animate the asteroid belt
+            d3.timer(function (elapsed) {
+                kuiperBelt.attr("transform", `translate(${center.x},${center.y}) rotate(${elapsed * 0.0002})`);
+            });
+        }
+
+        darwSolarSystem();
+    </script>
+
+</body>
+
+</html>
